@@ -1,0 +1,48 @@
+@import "./mixin/setOnepx.scss";
+.onepx,
+.onepx-t,
+.onepx-b,
+.onepx-tb,
+.onepx-l,
+.onepx-r {
+    position: relative;
+}
+
+.onepx {
+    &:before {
+        @include setLine(#c7c7c7);
+    }
+}
+
+.onepx-t {
+    &:before {
+        @include setTopLine(#c7c7c7);
+    }
+}
+
+.onepx-b {
+    &:after {
+        @include setBottomLine(#c7c7c7);
+    }
+}
+
+.onepx-tb {
+    &:before {
+        @include setBottomLine(#c7c7c7);
+    }
+    &:after {
+        @include setBottomLine(#c7c7c7);
+    }
+}
+
+.onepx-l {
+    &:before {
+        @include setLeftLine(#c7c7c7);
+    }
+}
+
+.onepx-r {
+    &:after {
+        @include setRightLine(#c7c7c7);
+    }
+}
