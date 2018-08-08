@@ -15,12 +15,12 @@ export const waitScanCode = params => {
 }
 // 版本1微信用户获取登录参数
 export const getLoginMessage = params => {
-  type = store.state.chatSession.redirectUriType
+  type = store.state.wx.redirectUriType
   return axios.get(`/cgi-bin/mmwebwx-bin/webwxnewloginpage?${params}`, {baseURL: type ? '/wx2' : '/wx1'})
 }
 // 登陆初始化
 export const getWxUserInfo = (urlContrnt, params) => {
-  type = store.state.chatSession.redirectUriType
+  type = store.state.wx.redirectUriType
   return axios.post(`/cgi-bin/mmwebwx-bin/webwxinit?r=${urlContrnt.r}&lang=${urlContrnt.lang}&pass_ticket=${urlContrnt.pass_ticket}`, params, {baseURL: type ? '/wx2' : '/wx1'})
 }
 // 获取微信图片

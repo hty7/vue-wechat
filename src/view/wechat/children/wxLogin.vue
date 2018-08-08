@@ -131,7 +131,7 @@ export default {
       let loginInit = {skey: skey, wxsid: wxsid, wxuin: wxuin, passTicket: passTicket}
       this.setLocalStorage('isWXLogin', true)
       this.setLocalStorage('loginInit', loginInit)
-      this.$emit('getWxUserInfo', loginInit)
+      this.$emit('getWxLoginUserInfo', loginInit)
     }
   }
 }

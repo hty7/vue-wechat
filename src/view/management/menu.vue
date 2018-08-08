@@ -37,7 +37,7 @@
 import {mapGetters} from 'vuex'
 export default {
   data: () => ({
-    mini: false
+    mini: true
   }),
   computed: {
     ...mapGetters(['controlsOption', 'permissionMap']),
