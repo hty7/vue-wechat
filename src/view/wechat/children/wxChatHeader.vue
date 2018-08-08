@@ -1,24 +1,31 @@
 <template>
-  <div class="chat-session-body">
-    <div class="chat-session-body-header">
-      <wx-chat-header></wx-chat-header>
-    </div>
-    <div class="chat-session-body-bd">
-      ddd
-    </div>
-    <div class="chat-session-body-ft">
-      <wx-chat-send-box></wx-chat-send-box>
-    </div>
+  <div class="chat-session-body-header">
+    <v-toolbar dark color="grey darken-4" height="56">
+      <v-toolbar-title class="white--text">YJ</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn fab dark small color="primary">
+        <v-icon dark>remove</v-icon>
+      </v-btn>
+      <v-btn fab dark small color="teal">
+        <v-icon dark>list</v-icon>
+      </v-btn>
+      <v-btn fab dark small color="grey darken-3">
+        <v-icon dark>edit</v-icon>
+      </v-btn>
+      <v-btn fab dark small color="grey darken-3">
+        <v-icon dark>search</v-icon>
+      </v-btn>
+      <v-btn fab dark small color="grey darken-3">
+        <v-icon dark>account_circle</v-icon>
+      </v-btn>
+    </v-toolbar>
   </div>
 </template>
 
 <script>
-import WxChatSendBox from './wxChatSendBox'
-import wxChatHeader from './wxChatHeader'
 import {mapGetters, mapActions} from 'vuex'
 export default {
   components: {
-    WxChatSendBox, wxChatHeader
   },
   data: () => ({
     userCardShow: false
