@@ -136,15 +136,6 @@ export default {
       let userInfo = JSON.parse(this.getLocalStorage('userInfo'))
       Object.assign(this.accoutMes, userInfo)
       if (!this.userInfo) this.$store.commit('GET_CURRENTDATA', userInfo)
-      // 页面刷新重新初始化网格搜索条件
-      this.$store.commit('SET_DATELOCATION', {
-        provId: userInfo.provId,
-        provName: userInfo.provName,
-        cityId: userInfo.cityId,
-        cityName: userInfo.cityName,
-        distId: userInfo.distId,
-        distName: userInfo.distName
-      })
     },
     drawer () {
       this.$store.commit('SET_CONTROLSOPTION', {drawer: !this.controlsOption.drawer})

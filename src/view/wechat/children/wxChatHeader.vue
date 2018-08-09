@@ -1,7 +1,9 @@
 <template>
   <div class="chat-session-body-header">
     <v-toolbar dark color="grey darken-4" height="56">
-      <v-toolbar-title class="white--text">YJ</v-toolbar-title>
+      <v-toolbar-title class="white--text">
+        <span v-html="activeUser.RemarkName?activeUser.RemarkName:activeUser.NickName"></span>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn fab dark small color="primary">
         <v-icon dark>remove</v-icon>
@@ -31,7 +33,7 @@ export default {
     userCardShow: false
   }),
   computed: {
-    ...mapGetters(['isWXLogin'])
+    ...mapGetters(['activeUser'])
   },
   methods: {
     ...mapActions(['getWxUserInfo', 'updateWxUserMember']),

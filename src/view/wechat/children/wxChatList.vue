@@ -47,33 +47,16 @@ export default {
   data: () => ({
     items: [],
     search: null,
-    select: null,
-    chatUserList: [
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'},
-      {time: '12/10', hadRead: false, HeadImgUrl: '', RemarkName: 'YJ', NickName: 'Yangjian', newChat: 'tttttt'}
-    ]
+    select: null
   }),
   computed: {
-    ...mapGetters(['isWXLogin', 'redirectUriType', 'activeIndex']),
+    ...mapGetters(['isWXLogin', 'chatUserList', 'redirectUriType', 'activeIndex']),
     baseURL () {
       return this.redirectUriType ? '/wx2' : '/wx1'
     }
   },
   methods: {
-    ...mapActions(['getWxUserInfo', 'updateWxUserMember']),
-    async getWxLoginUserInfo () {
-      await this.getWxUserInfo()
-    }
+    ...mapActions(['getWxUserInfo', 'updateWxUserMember'])
   }
 }
 </script>

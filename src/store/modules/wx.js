@@ -1,4 +1,4 @@
-import {getWxUserInfo, getWxContact} from '@/service/modules/wx'
+import {getWxContact} from '@/service/modules/wx'
 import * as types from '../mutation-types'
 import {getLocalStorage, setLocalStorage} from '@/utils/utils'
 const state = {
@@ -57,63 +57,6 @@ const getters = {
 }
 
 const actions = {
-  // 获取初始化信息（账号头像信息、聊天好友、阅读等）
-  // "Uin": 0,
-  // "UserName": 用户名称，一个"@"为好友，两个"@"为群组
-  // "NickName": 昵称
-  // "HeadImgUrl":头像图片链接地址
-  // "ContactFlag": 1-好友， 2-群组， 3-公众号
-  // "MemberCount": 成员数量，只有在群组信息中才有效,
-  // "MemberList": 成员列表,
-  // "RemarkName": 备注名称
-  // "HideInputBarFlag": 0,
-  // "Sex": 性别，0-未设置（公众号、保密），1-男，2-女
-  // "Signature": 公众号的功能介绍 or 好友的个性签名
-  // "VerifyFlag": 0,
-  // "OwnerUin": 0,
-  // "PYInitial": 用户名拼音缩写
-  // "PYQuanPin": 用户名拼音全拼
-  // "RemarkPYInitial":备注拼音缩写
-  // "RemarkPYQuanPin": 备注拼音全拼
-  // "StarFriend": 是否为星标朋友  0-否  1-是
-  // "AppAccountFlag": 0,
-  // "Statues": 0,
-  // "AttrStatus": 119911,
-  // "Province": 省
-  // "City": 市
-  // "Alias":
-  // "SnsFlag": 17,
-  // "UniFriend": 0,
-  // "DisplayName": "",
-  // "ChatRoomId": 0,
-  // "KeyWord":
-  // "EncryChatRoomId": ""
-  // 获取微信登陆用户信息
-  async getWxUserInfo ({commit}, param) {
-    let LoginInit = JSON.parse(getLocalStorage('loginInit'))
-    let urlContrnt = {
-      r: ~new Date().getTime(),
-      lang: 'zh_CN',
-      pass_ticket: LoginInit.passTicket
-    }
-    let params = {
-      BaseRequest: {
-        DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
-        Sid: LoginInit.wxsid,
-        Skey: LoginInit.skey,
-        Uin: LoginInit.wxuin
-      }
-    }
-    let res = await getWxUserInfo(urlContrnt, params)
-    if (res.BaseResponse && res.BaseResponse.Ret === 1101) {
-      commit(types.SET_WXLOGINSTATUS, false)
-      return
-    }
-    if (res.BaseResponse && res.BaseResponse.Ret === 0) {
-      commit(types.SET_LOGINWXUSERINFO, res)
-      setLocalStorage('synckey', res.SyncKey)
-    }
-  },
   // 获取微信通讯录
   async getWxContact ({commit}, param) {
     let LoginInit = JSON.parse(getLocalStorage('loginInit'))
@@ -152,6 +95,7 @@ const mutations = {
   },
   [types.SET_WXLOGINSTATUS] (state, data) {
     state.isWXLogin = data
+    setLocalStorage('isWXLogin', data)
   },
   [types.SET_HASCHECKLOADING] (state, data) {
     state.hasCheckLoading = data

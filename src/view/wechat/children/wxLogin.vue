@@ -124,14 +124,19 @@ export default {
       let params = val + '&fun=new&version=v2'
       let res = await getLoginMessage(params)
       let xmlDom = new DOMParser().parseFromString(res, 'text/xml')
+      let ret = xmlDom.getElementsByTagName('ret')[0].innerHTML
       let skey = xmlDom.getElementsByTagName('skey')[0].innerHTML
       let wxsid = xmlDom.getElementsByTagName('wxsid')[0].innerHTML
       let wxuin = xmlDom.getElementsByTagName('wxuin')[0].innerHTML
       let passTicket = xmlDom.getElementsByTagName('pass_ticket')[0].innerHTML
       let loginInit = {skey: skey, wxsid: wxsid, wxuin: wxuin, passTicket: passTicket}
-      this.setLocalStorage('isWXLogin', true)
-      this.setLocalStorage('loginInit', loginInit)
-      this.$emit('getWxLoginUserInfo', loginInit)
+      console.log(ret)
+      if (ret === '0') {
+        this.setLocalStorage('isWXLogin', true)
+        this.$store.commit('SET_WXLOGINSTATUS', true)
+        this.setLocalStorage('loginInit', loginInit)
+        this.$emit('getWxLoginUserInfo', loginInit)
+      }
     }
   }
 }
