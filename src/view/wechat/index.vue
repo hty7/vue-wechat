@@ -16,22 +16,20 @@ import WxChatList from './children/wxChatList'
 import WxChatContent from './children/wxChatContent'
 import {mapGetters, mapActions} from 'vuex'
 import {matchRegDbrackets} from '@/utils/regular'
-import {getWxUserInfo, checkWebSync} from '@/service/modules/wx'
+import {getWxUserInfo, checkWebSync, getWebWXSync} from '@/service/modules/wx'
 export default {
   components: {
     WxLogin, WxChatList, WxChatContent, WxChatSideBar
   },
   data: () => ({}),
   computed: {
-    ...mapGetters(['isWXLogin', 'hasCheckLoading', 'chatUserList'])
+    ...mapGetters(['isWXLogin', 'hasCheckLoading', 'loginWxUserInfo', 'chatUserList', 'activeIndex', 'activeUser', 'userChatLog', 'activeMessageList'])
   },
   created () {
-    if (this.isWXLogin && !this.hasCheckLoading) {
-      this.checkWebSync()
-    }
+    if (this.isWXLogin) this.getWxLoginUserInfo()
   },
   methods: {
-    ...mapActions(['updateWxUserMember']),
+    ...mapActions(['getWxContact']),
     // 初始化
     load (res) {
       let chatUserList = this.chatUserList
@@ -44,7 +42,7 @@ export default {
       this.$store.commit('SET_CHATUSERLIST', chatUserList)
       this.$store.commit('SET_ACTIVEUSER', chatUserList[0])
     },
-    async getWxLoginUserInfo ({commit}, param) {
+    async getWxLoginUserInfo () {
       let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
       let urlContrnt = {
         r: ~new Date().getTime(),
@@ -69,6 +67,7 @@ export default {
         this.setLocalStorage('synckey', res.SyncKey)
         this.setLocalStorage('loginWxuserInfo', res)
         this.checkWebSync() // 启动心调检测
+        await this.getWxContact()
         await this.load(res.ContactList)
       }
     },
@@ -112,6 +111,99 @@ export default {
           this.$store.commit('SET_WXLOGINSTATUS', false)
         }
       })
+    },
+    // 获取微信新消息
+    async getWebWXSync () {
+      let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
+      let syncKey = JSON.parse(this.getLocalStorage('synckey'))
+      let urlContrnt = {
+        sid: LoginInit.wxsid,
+        lang: 'zh_CN',
+        skey: LoginInit.skey,
+        pass_ticket: LoginInit.passTicket
+      }
+      let params = {
+        BaseRequest: {
+          DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
+          Sid: LoginInit.wxsid,
+          Skey: LoginInit.skey,
+          Uin: LoginInit.wxuin
+        },
+        SyncKey: syncKey
+      }
+      let res = await getWebWXSync(urlContrnt, params)
+      this.setLocalStorage('synckey', res.SyncCheckKey)
+      if (res.AddMsgCount) {
+        let wxContactList = JSON.parse(this.getLocalStorage('wxContact'))
+        res.AddMsgList.forEach(item => {
+          if (item.Content || item.MsgType === 47) {
+            let chatUserList = this.chatUserList
+            let hasNewUserInfo = null
+            let hasUser = null
+            if (item.FromUserName === this.loginWxUserInfo.User.UserName) {
+              // 接受到自己微信信息
+              hasNewUserInfo = wxContactList.find(el => {
+                return el.UserName === item.ToUserName
+              })
+              hasUser = chatUserList.findIndex(el => {
+                return el.UserName === item.ToUserName
+              })
+            } else {
+              // 接受到别人微信信息
+              hasNewUserInfo = wxContactList.find(el => {
+                return el.UserName === item.FromUserName
+              })
+              hasUser = chatUserList.findIndex(el => {
+                return el.UserName === item.FromUserName
+              })
+            }
+            if (hasNewUserInfo) {
+              let activeIndex = this.activeIndex
+              let userChatLog = this.userChatLog
+              let activeMessageList = this.activeMessageList
+              if (hasUser !== -1) {
+                chatUserList.splice(hasUser, 1)
+                if (activeIndex < hasUser) activeIndex += 1 // 有新信息用户置前，高亮节点下移
+              } else {
+                // 非用户列表用户，选中节点下移
+                activeIndex += 1
+              }
+              if (this.activeUser.UserName === hasNewUserInfo.UserName) {
+                activeIndex = 0 // 处于选中状态用户提前高亮
+              } else {
+                hasNewUserInfo.hadRead = false
+              }
+              chatUserList.unshift(hasNewUserInfo)
+              chatUserList[0].newChat = item.Content
+              if (!item.Content && item.MsgType === 47) chatUserList[0].newChat = '[收到了一个表情，请在手机上查看]' // 非系统内置表情
+              if (item.MsgType === 10002) chatUserList[0].newChat = '[撤回一条信息]' // 信息被撤回处理
+              if (item.MsgType === 49) chatUserList[0].newChat = '[文件]' // 收到文件
+              chatUserList[0].time = this.setDateFormat(new Date(), 0, 'hh:mm')
+              this.$store.commit('SET_CHATUSERLIST', chatUserList)
+              this.$store.commit('SET_ACTIVEINDEX', activeIndex)
+              if (!userChatLog[hasNewUserInfo.UserName]) userChatLog[hasNewUserInfo.UserName] = []
+              if (item.MsgType === 10002) {
+                // 信息被撤回，不入库处理
+                const matchREG = /&lt;msgid&gt;(.+?)&lt;\/msgid/
+                let msgid = null
+                if (item.Content.match(matchREG)[1]) msgid = item.Content.match(matchREG)[1]
+                userChatLog[hasNewUserInfo.UserName] = userChatLog[hasNewUserInfo.UserName].map(el => {
+                  if (el.MsgId === msgid) el.recall = true
+                  return el
+                })
+              } else {
+                userChatLog[hasNewUserInfo.UserName].push(item)
+              }
+              this.$store.commit('SET_USERCHATLOG', userChatLog)
+              if (this.activeUser.UserName === hasNewUserInfo.UserName) {
+                activeMessageList = this.userChatLog[this.activeUser.UserName] ? this.userChatLog[this.activeUser.UserName] : []
+                this.$store.commit('SET_ACTIVEMESSAGELIST', activeMessageList) // 更新高亮对话
+              }
+            }
+          }
+        })
+      }
+      this.checkWebSync()
     }
   }
 }

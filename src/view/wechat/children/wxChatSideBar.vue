@@ -1,49 +1,39 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-avatar">
-      <v-avatar><img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="John"></v-avatar>
+      <v-avatar><img :src="userInfo.userAvatar" alt="John"></v-avatar>
     </div>
-    <div class="sidebar-btn">
-      <v-btn flat icon color="pink">
-        <v-icon dark>add</v-icon>
+    <div class="sidebar-btn" v-for="item in sideMenu" :key="item.indexKey" @click="toggle(item.indexKey)">
+      <v-btn fab dark small color="pink" v-show="selectSideMenu === item.indexKey">
+        <v-icon dark>{{item.icon}}</v-icon>
       </v-btn>
-    </div>
-    <div class="sidebar-btn">
-      <v-btn fab dark small color="pink">
-        <v-icon dark>favorite</v-icon>
-      </v-btn>
-    </div>
-    <div class="sidebar-btn">
-      <v-btn flat icon color="pink">
-        <v-icon dark>edit</v-icon>
-      </v-btn>
-    </div>
-    <div class="sidebar-btn">
-      <v-btn flat icon color="pink">
-        <v-icon dark>android</v-icon>
-      </v-btn>
-    </div>
-    <div class="sidebar-btn">
-      <v-btn flat icon color="pink">
-        <v-icon dark>list</v-icon>
+      <v-btn flat icon color="pink" v-show="selectSideMenu !== item.indexKey">
+        <v-icon dark>{{item.icon}}</v-icon>
       </v-btn>
     </div>
   </div>
 </template>
 
 <script>
-import {mapGetters, mapActions} from 'vuex'
+import {mapGetters} from 'vuex'
 export default {
   components: {
   },
-  data: () => ({}),
+  data: () => ({
+    sideMenu: [
+      {icon: 'favorite', indexKey: 1},
+      {icon: 'contacts', indexKey: 2},
+      {icon: 'face', indexKey: 3},
+      {icon: 'android', indexKey: 4},
+      {icon: 'list', indexKey: 5}
+    ]
+  }),
   computed: {
-    ...mapGetters(['isWXLogin'])
+    ...mapGetters(['selectSideMenu', 'userInfo'])
   },
   methods: {
-    ...mapActions(['getWxUserInfo', 'updateWxUserMember']),
-    async getWxLoginUserInfo () {
-      await this.getWxUserInfo()
+    toggle (val) {
+      this.$store.commit('SET_SELECTSIDEMENU', val)
     }
   }
 }

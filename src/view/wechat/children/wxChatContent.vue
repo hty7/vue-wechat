@@ -10,7 +10,7 @@
           <div class="clearfix">
             <div :class="['message-item', item.FromUserName !== loginWxUserInfo.User.UserName?'you':'me']">
               <img :src="baseURL + loginWxUserInfo.User.HeadImgUrl" class="avatar" v-if="item.FromUserName === loginWxUserInfo.User.UserName">
-              <img :src="activeUser.HeadImgUrl" class="avatar" alt="" v-else>
+              <img :src="baseURL + activeUser.HeadImgUrl" class="avatar" alt="" v-else>
               <div class="chatcontent">
                 <div class="bubble" :style="{backgroundColor: item.FromUserName !== loginWxUserInfo.User.UserName?'#fff':'#3b7abe', color: item.FromUserName !== loginWxUserInfo.User.UserName?'#000':'#fff'}">
                   <div v-show="item.recall" class="recall">信息已被撤回</div>
@@ -51,10 +51,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getWxUserInfo', 'updateWxUserMember']),
-    async getWxLoginUserInfo () {
-      await this.getWxUserInfo()
-    }
+    ...mapActions([])
   }
 }
 </script>
@@ -127,9 +124,8 @@ export default {
         .avatar {
           width: 40px;
           height: 40px;
-          border-radius: 50%;
-          border: 4px #fff solid;
-          background: #fff;
+          border-radius: 6px;
+          border: 1px #3e3e3e solid;
           float: left;
           margin: 5px 0;
           cursor: pointer;

@@ -1,7 +1,8 @@
-import {getWxContact} from '@/service/modules/wx'
+import {getWxContact, setWxMsgStatus} from '@/service/modules/wx'
 import * as types from '../mutation-types'
 import {getLocalStorage, setLocalStorage} from '@/utils/utils'
 const state = {
+  selectSideMenu: 1, // 侧边功能按钮
   isWXLogin: JSON.parse(getLocalStorage('isWXLogin')), // 用户微信登陆状态
   hasCheckLoading: 0, // 心跳是否正常
   loginWxUserInfo: JSON.parse(getLocalStorage('loginWxuserInfo')), // 微信用户信息
@@ -17,26 +18,14 @@ const state = {
     HeadImgUrl: '/static/images/logo.png'
   }, // 高亮用户
   activeIndex: 0, // 聊天高亮节点
-  activeMessageList: [
-    {
-      Content: 'dddddd',
-      MsgType: 1,
-      FromUserName: '@03acd75b7d9d33002c68fa7f4be7ebe1a8f403d62480a0de19976bbf5929f75a',
-      ToUserName: '@fgghhhhh766'
-    },
-    {
-      Content: 'dd会随机发货v决定能否vdddd',
-      MsgType: 1,
-      FromUserName: '@fgghhhhh766',
-      ToUserName: '@03acd75b7d9d33002c68fa7f4be7ebe1a8f403d62480a0de19976bbf5929f75a'
-    }
-  ], // 当前聊天用户聊天记录
+  activeMessageList: [], // 当前聊天用户聊天记录
   userChatLog: {}, // 用户聊天记录列表
   startCheckWebSync: 0, // 启动微信心跳
   hasWxUserList: {}
 }
 
 const getters = {
+  selectSideMenu: state => state.selectSideMenu,
   hasWxUserList: state => state.hasWxUserList,
   isWXLogin: state => state.isWXLogin,
   hasCheckLoading: state => state.hasCheckLoading,
@@ -69,10 +58,30 @@ const actions = {
     }
     let res = await getWxContact(params)
     commit(types.SET_USERMEMBERLIST, res.MemberList)
+  },
+  // 标记已读
+  async setWxMsgStatus ({commit}, param) {
+    let LoginInit = JSON.parse(getLocalStorage('loginInit'))
+    let params = {
+      BaseRequest: {
+        DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
+        Sid: LoginInit.wxsid,
+        Skey: LoginInit.skey,
+        Uin: LoginInit.wxuin
+      },
+      Code: 1,
+      FromUserName: state.loginWxUserInfo.User.UserName,
+      ToUserName: state.activeUser.UserName,
+      ClientMsgId: new Date().getTime()
+    }
+    await setWxMsgStatus(params)
   }
 }
 
 const mutations = {
+  [types.SET_SELECTSIDEMENU] (state, data) {
+    state.selectSideMenu = data
+  },
   [types.SET_USERCHATLOG] (state, data) {
     state.userChatLog = data
   },
@@ -121,17 +130,10 @@ const mutations = {
   [types.SET_USERMEMBERLIST] (state, data) {
     let userMemberList = []
     data.forEach((el, index) => {
-      if (el.SnsFlag) {
-        if (state.hasWxUserList[el.NickName]) {
-          el.isSync = 1
-        } else {
-          el.isSync = 0
-        }
-        if (el.StarFriend) {
-          userMemberList.unshift(el)
-        } else {
-          userMemberList.push(el)
-        }
+      if (el.StarFriend) {
+        userMemberList.unshift(el)
+      } else {
+        userMemberList.push(el)
       }
     })
     state.userMemberList = userMemberList
