@@ -16,7 +16,7 @@ import WxChatList from './children/wxChatList'
 import WxChatContent from './children/wxChatContent'
 import {mapGetters, mapActions} from 'vuex'
 import {matchRegDbrackets} from '@/utils/regular'
-import {getWxUserInfo, checkWebSync, getWebWXSync} from '@/service/modules/wx'
+import {getWxUserInfo, checkWebSync, getWebWXSync, getWxBatchGetContact} from '@/service/modules/wx'
 export default {
   components: {
     WxLogin, WxChatList, WxChatContent, WxChatSideBar
@@ -69,6 +69,36 @@ export default {
         this.checkWebSync() // 启动心调检测
         await this.getWxContact()
         await this.load(res.ContactList)
+        this.getWxBatchGetContact(res.ChatSet, res.ContactList)
+      }
+    },
+    // 获取聊天会话列表
+    // recentUser 最近联系人
+    // recentUserList 最近联系人列表
+    async getWxBatchGetContact (recentUser, recentUserList) {
+      let recentUserNameList = null
+      if (recentUser) {
+        recentUserNameList = recentUser.split(',')
+      }
+      if (recentUserNameList.length > recentUserList.length) {
+        recentUserNameList = recentUserNameList.slice(recentUserList.length)
+        let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
+        let urlContrnt = {
+          type: 'ex',
+          r: new Date().getTime()
+        }
+        let params = {
+          BaseRequest: {
+            DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
+            Sid: LoginInit.wxsid,
+            Skey: LoginInit.skey,
+            Uin: LoginInit.wxuin
+          },
+          Count: recentUserNameList.length,
+          List: recentUserNameList.map(item => { return {EncryChatRoomId: '', UserName: item} })
+        }
+        let res = await getWxBatchGetContact(urlContrnt, params)
+        if (res.BaseResponse.Ret === 0) this.load(res.ContactList)
       }
     },
     // 心跳检测
