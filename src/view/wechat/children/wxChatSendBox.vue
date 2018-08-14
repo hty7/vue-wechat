@@ -4,8 +4,26 @@
 */
 <template>
    <div class="chat-session-body-ft">
+    <div class="emoji-box">
+      <v-tabs v-model="activeEmoji" color="grey darken-3" dark slider-color="white">
+        <v-tab key="1" ripple>qq表情</v-tab>
+        <v-tab key="2" ripple>符号表情</v-tab>
+        <v-tab-item key="1">
+          <div class="qq-face">
+            <a v-for="(item, key) in QQFaceListData" :title="item.name" :key="key" :class="['face', 'qqface'+item.id]" @click="selsectEmoji(item)"></a>
+          </div>
+        </v-tab-item>
+        <v-tab-item key="2" style="background: #3a3a3a;">
+          <div style="overflow-y: auto;height: 222px;overflow-x: hidden;">
+            <div class="emoji-face">
+              <a v-for="(item, key) in fhEmojoList" :title="item.name" :key="key" :class="['face', 'emoji'+key]" @click="selsectfhEmoji(item)"></a>
+            </div>
+          </div>
+        </v-tab-item>
+      </v-tabs>
+    </div>
     <div class="topBar">
-      <v-btn flat icon small color="grey darken-2">
+      <v-btn flat icon small color="grey darken-2" slot="activator">
         <v-icon>face</v-icon>
       </v-btn>
       <v-btn flat icon small color="grey darken-2">
@@ -30,14 +48,26 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {sendWxMsg} from '@/service/modules/wx'
+import {QQFaceList, QQFaceMap, EmojiList} from '@/utils/dict'
 export default {
   components: {
   },
   data: () => ({
-    message: ''
+    message: '',
+    activeEmoji: 1
   }),
   computed: {
-    ...mapGetters(['loginWxUserInfo', 'activeUser', 'userChatLog', 'chatUserList', 'activeMessageList'])
+    ...mapGetters(['loginWxUserInfo', 'activeUser', 'userChatLog', 'chatUserList', 'activeMessageList']),
+    QQFaceListData () {
+      return QQFaceList.map(el => {
+        return {name: el, id: QQFaceMap[el]}
+      })
+    },
+    fhEmojoList () {
+      return EmojiList.map(el => {
+        return {name: el, id: QQFaceMap[`[${el}]`]}
+      })
+    }
   },
   methods: {
     ...mapActions(['getWxUserInfo', 'updateWxUserMember']),
@@ -91,6 +121,12 @@ export default {
 
 <style lang="scss" scoped>
 .chat-session-body-ft {
+  .emoji-box {
+    position: absolute;
+    left: 0;
+    top: -270px;
+    height: 270px;
+  }
   .topBar {
     height: 40px;
     padding: 0 17px;

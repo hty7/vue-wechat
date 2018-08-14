@@ -107,7 +107,6 @@ export default {
       let newUserMemberList = this.userMemberList
       let result = val ? newUserMemberList.filter(this.createFilter(val)) : newUserMemberList
       this.items = result
-      console.log(result)
       this.isLoading = false
     }
   },

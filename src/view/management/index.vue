@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire" :dark="controlsOption.hints">
     <Vheader></Vheader>
-    <Vmenu></Vmenu>
+   <!--  <Vmenu></Vmenu> -->
     <v-content ref="mainContent">
       <v-container fluid ref="mainContainer">
         <v-fade-transition mode="out-in">
@@ -15,10 +15,10 @@
 <script>
 import {mapGetters} from 'vuex'
 import Vheader from '@/components/header'
-import Vmenu from './menu'
+// import Vmenu from './menu'
 export default {
   components: {
-    Vheader, Vmenu
+    Vheader
   },
   data: () => ({}),
   computed: {

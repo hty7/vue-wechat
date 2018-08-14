@@ -13,7 +13,7 @@ const wechat = r => require.ensure([], () => (require('@/view/wechat/')), 'wecha
 let routes = [{
   path: '/',
   component: management,
-  redirect: '/user',
+  redirect: '/wechat',
   children: [
     {
       path: '/user',

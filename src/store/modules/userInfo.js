@@ -1,7 +1,6 @@
 import {login, getUserList} from '@/service/modules/userInfo'
 import * as types from '../mutation-types'
 const state = {
-  userInfo: null, // 用户信息
   userList: {
     data: [],
     size: 10,
@@ -10,7 +9,6 @@ const state = {
 }
 
 const getters = {
-  userInfo: state => state.userInfo,
   userList: state => state.userList
 }
 
@@ -29,7 +27,6 @@ const actions = {
 
 const mutations = {
   [types.GET_CURRENTDATA] (state, data) {
-    state.userInfo = data
   },
   [types.GET_USERLIST] (state, data) {
     state.userList = data

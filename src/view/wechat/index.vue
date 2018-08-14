@@ -35,7 +35,7 @@ export default {
       let chatUserList = this.chatUserList
       res.forEach(el => {
         let hasItem = chatUserList.find(item => { return el.NickName === item.NickName })
-        if (!hasItem) {
+        if (!hasItem && el.VerifyFlag === 0) {
           chatUserList.push(el)
         }
       })

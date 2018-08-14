@@ -2,6 +2,7 @@ import {getWxContact, setWxMsgStatus} from '@/service/modules/wx'
 import * as types from '../mutation-types'
 import {getLocalStorage, setLocalStorage} from '@/utils/utils'
 const state = {
+  userInfo: JSON.parse(getLocalStorage('userInfo')),
   selectSideMenu: 1, // 侧边功能按钮
   isWXLogin: JSON.parse(getLocalStorage('isWXLogin')), // 用户微信登陆状态
   hasCheckLoading: 0, // 心跳是否正常
@@ -25,6 +26,7 @@ const state = {
 }
 
 const getters = {
+  userInfo: state => state.userInfo,
   selectSideMenu: state => state.selectSideMenu,
   hasWxUserList: state => state.hasWxUserList,
   isWXLogin: state => state.isWXLogin,
@@ -130,10 +132,12 @@ const mutations = {
   [types.SET_USERMEMBERLIST] (state, data) {
     let userMemberList = []
     data.forEach((el, index) => {
-      if (el.StarFriend) {
-        userMemberList.unshift(el)
-      } else {
-        userMemberList.push(el)
+      if (el.VerifyFlag === 0) {
+        if (el.StarFriend) {
+          userMemberList.unshift(el)
+        } else {
+          userMemberList.push(el)
+        }
       }
     })
     state.userMemberList = userMemberList
