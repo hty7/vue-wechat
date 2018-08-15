@@ -4,16 +4,16 @@
 */
 <template>
    <div class="chat-session-body-ft">
-    <div class="emoji-box">
+    <div class="emoji-box" v-show="emojiBoxShow">
       <v-tabs v-model="activeEmoji" color="grey darken-3" dark slider-color="white">
-        <v-tab key="1" ripple>qq表情</v-tab>
-        <v-tab key="2" ripple>符号表情</v-tab>
-        <v-tab-item key="1">
+        <v-tab key="qqemoji" ripple>qq表情</v-tab>
+        <v-tab key="fhemoji" ripple>符号表情</v-tab>
+        <v-tab-item key="qqemoji">
           <div class="qq-face">
-            <a v-for="(item, key) in QQFaceListData" :title="item.name" :key="key" :class="['face', 'qqface'+item.id]" @click="selsectEmoji(item)"></a>
+            <a v-for="(item, key) in QQFaceListData" :title="item.name" :key="key" :class="['face', 'qqface'+item.id]" @click="selsectEmoji(item.name)"></a>
           </div>
         </v-tab-item>
-        <v-tab-item key="2" style="background: #3a3a3a;">
+        <v-tab-item key="fhemoji" style="background: #3a3a3a;">
           <div style="overflow-y: auto;height: 222px;overflow-x: hidden;">
             <div class="emoji-face">
               <a v-for="(item, key) in fhEmojoList" :title="item.name" :key="key" :class="['face', 'emoji'+key]" @click="selsectfhEmoji(item)"></a>
@@ -23,7 +23,7 @@
       </v-tabs>
     </div>
     <div class="topBar">
-      <v-btn flat icon small color="grey darken-2" slot="activator">
+      <v-btn flat icon small :color="emojiBoxShow?'pink':'grey darken-2'" @click="emojiBoxShow = !emojiBoxShow">
         <v-icon>face</v-icon>
       </v-btn>
       <v-btn flat icon small color="grey darken-2">
@@ -37,7 +37,7 @@
       </v-btn>
     </div>
     <div class="my-message">
-      <v-textarea v-model="message" height="68" no-resize persistent-hint solo @keyup.ctrl.enter.native="sendMessage"></v-textarea>
+      <v-textarea v-model="message" height="68" no-resize persistent-hint solo @keyup.ctrl.enter.native="sendMessage" @click="emojiBoxShow = false"></v-textarea>
       <div class="send-btn">
         <span>按下ctrl + enter发送信息</span><v-btn flat icon color="pink" @click="sendMessage"><v-icon>send</v-icon></v-btn>
       </div>
@@ -48,16 +48,17 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {sendWxMsg} from '@/service/modules/wx'
-import {QQFaceList, QQFaceMap, EmojiList} from '@/utils/dict'
+import {QQFaceList, QQFaceMap, EmojiList, EmojiCodeMap} from '@/utils/dict'
 export default {
   components: {
   },
   data: () => ({
     message: '',
-    activeEmoji: 1
+    activeEmoji: 'qqemoji',
+    emojiBoxShow: false
   }),
   computed: {
-    ...mapGetters(['loginWxUserInfo', 'activeUser', 'userChatLog', 'chatUserList', 'activeMessageList']),
+    ...mapGetters(['loginWxUserInfo', 'activeUser', 'userChatLog', 'chatUserList', 'activeMessageList', 'activeIndex']),
     QQFaceListData () {
       return QQFaceList.map(el => {
         return {name: el, id: QQFaceMap[el]}
@@ -73,6 +74,7 @@ export default {
     ...mapActions(['getWxUserInfo', 'updateWxUserMember']),
     // 发送信息
     async sendMessage () {
+      this.emojiBoxShow = false
       if (this.message) {
         let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
         let urlContrnt = {
@@ -114,6 +116,17 @@ export default {
           this.message = null
         }
       }
+    },
+    // 选择qq表情
+    selsectEmoji (el) {
+      if (!this.message) this.message = ''
+      this.message += `[${el}]`
+    },
+    // 选择符号表情
+    selsectfhEmoji (el) {
+      if (!this.message) this.message = ''
+      // 将表情插入文本中，并另存一份非编译表情文本
+      this.message += EmojiCodeMap[el.id]
     }
   }
 }
@@ -126,6 +139,7 @@ export default {
     left: 0;
     top: -270px;
     height: 270px;
+    box-shadow: 5px -5px 6px 0px #1e1e1e;
   }
   .topBar {
     height: 40px;

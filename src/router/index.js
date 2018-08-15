@@ -7,7 +7,6 @@ Vue.use(Router)
 const NotFound = r => require.ensure([], () => (require('@/components/NotFound')), 'NotFound')
 const login = r => require.ensure([], () => (require('@/view/login/login')), 'login')
 const management = r => require.ensure([], () => (require('@/view/management/')), 'management')
-const user = r => require.ensure([], () => (require('@/view/userManagement/')), 'userManagement')
 const wechat = r => require.ensure([], () => (require('@/view/wechat/')), 'wechat')
 
 let routes = [{
@@ -15,14 +14,6 @@ let routes = [{
   component: management,
   redirect: '/wechat',
   children: [
-    {
-      path: '/user',
-      component: user,
-      meta: {
-        id: '1000',
-        permission: 'user_view'
-      }
-    },
     {
       path: '/wechat',
       component: wechat,

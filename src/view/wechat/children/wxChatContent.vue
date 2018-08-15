@@ -17,7 +17,7 @@
                   <!-- 1 文字 3 图片 34语音 47表情 -->
                   <div class="bubble-text" v-show="item.MsgType === 1">
                     <div class="plain">
-                      <span v-html="item.Content"></span>
+                      <wx-chat-item :msg="item.Content"></wx-chat-item>
                     </div>
                   </div>
                 </div>
@@ -36,10 +36,11 @@
 <script>
 import WxChatSendBox from './wxChatSendBox'
 import wxChatHeader from './wxChatHeader'
+import wxChatItem from './wxChatItem'
 import {mapGetters, mapActions} from 'vuex'
 export default {
   components: {
-    WxChatSendBox, wxChatHeader
+    WxChatSendBox, wxChatHeader, wxChatItem
   },
   data: () => ({
     userCardShow: false
