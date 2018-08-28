@@ -187,6 +187,7 @@ export default {
                 return el.UserName === item.FromUserName
               })
             }
+            console.log(hasNewUserInfo, hasUser)
             if (hasNewUserInfo) {
               let activeIndex = this.activeIndex
               let userChatLog = this.userChatLog

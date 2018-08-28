@@ -104,7 +104,12 @@ export default {
       userName: 'John YJ',
       roleName: '超级管理员',
       des: 'Front-end development engineer',
-      avatar: '/static/images/avatar.jpg'
+      avatar: '/static/images/avatar.jpg',
+      phoneNum: 19999999999,
+      email: '110@qq.com',
+      provName: '广东省',
+      cityName: '广州市',
+      distName: '天河区'
     },
     cellArea: ''
   }),

@@ -10,7 +10,6 @@ const getters = {
 
 const actions = {
   async getRoleModules ({commit}, params) {
-    console.log(params)
     let data = await getRoleModules(params)
     commit(types.GET_ROLEMODULES, data)
   }

@@ -21,12 +21,12 @@ module.exports = {
         pathRewrite: {
           '^/wx1': '/'
         },
-        onProxyRes: function(proxyRes, req, res) {
-          var cookies = proxyRes.headers['set-cookie']
-          var cookieRegex = /Secure/i
+        onProxyRes: (proxyRes, req, res) => {
+          let cookies = proxyRes.headers['set-cookie']
+          let cookieRegex = /Secure/i
           //修改cookie secure
           if (cookies) {
-            var newCookie = cookies.map(function(cookie) {
+            let newCookie = cookies.map((cookie) => {
               if (cookieRegex.test(cookie)) {
                 return cookie.replace(cookieRegex, '')
               }

@@ -6,19 +6,9 @@ export const login = param => {
 export const logout = param => {
   return axios.post('/login/logout', param)
 }
-/* 用户管理模块 */
-export const getUserList = params => {
-  return axios.post('/system/userList', params)
+export const getUserList = param => {
+  return axios.post('/user/list', param)
 }
-/* 用户信息修改 */
-export const updateUserData = params => {
-  return axios.post('/system/updateUser', params)
-}
-/* 新增用户信息 */
-export const addUserData = params => {
-  return axios.post('/system/insertUser', params)
-}
-/* 删除用户信息 */
-export const delUserData = params => {
-  return axios.post('/system/deleteUser', params)
+export const updateUserData = param => {
+  return axios.post('/user/update', param)
 }
