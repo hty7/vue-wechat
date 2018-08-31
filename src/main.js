@@ -13,7 +13,7 @@ import * as filters from './filters'
 import * as methods from './utils/utils'
 import 'vuetify/dist/vuetify.min.css'
 import './plugins/toast/toast.css'
-import { Cascader, DatePicker, MessageBox, Loading } from 'element-ui'
+import { Cascader, DatePicker, MessageBox, Loading, Upload } from 'element-ui'
 import 'babel-polyfill'
 /* 平台国际语言静态字典 */
 import LangEn from './lang/en'
@@ -34,6 +34,7 @@ Vue.use(VueLazyLoad, {
 Vue.use(VueI18n)
 Vue.use(Cascader)
 Vue.use(DatePicker)
+Vue.use(Upload)
 
 // 全局混入
 Vue.mixin(mixin)

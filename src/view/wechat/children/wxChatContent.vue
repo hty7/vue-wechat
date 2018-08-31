@@ -15,10 +15,14 @@
                 <div class="bubble" :style="{backgroundColor: item.FromUserName !== loginWxUserInfo.User.UserName?'#fff':'#3b7abe', color: item.FromUserName !== loginWxUserInfo.User.UserName?'#000':'#fff'}">
                   <div v-show="item.recall" class="recall">信息已被撤回</div>
                   <!-- 1 文字 3 图片 34语音 47表情 -->
-                  <div class="bubble-text" v-show="item.MsgType === 1">
+                  <div class="bubble-text" v-if="item.MsgType === 1">
                     <div class="plain">
                       <wx-chat-item :msg="item.Content"></wx-chat-item>
                     </div>
+                  </div>
+                  <!-- 图片处理 -->
+                  <div class="bubble-image" v-if="item.MsgType === 3" @click="showImageShow(true, item.MsgId)">
+                    <img class="img" :src="`${baseURL}/cgi-bin/mmwebwx-bin/webwxgetmsgimg?type=slave&MsgId=${item.MsgId}&skey=${BaseRequest.skey}`">
                   </div>
                 </div>
               </div>
@@ -49,6 +53,9 @@ export default {
     ...mapGetters(['isWXLogin', 'activeMessageList', 'loginWxUserInfo', 'redirectUriType', 'activeUser']),
     baseURL () {
       return this.redirectUriType ? '/wx2' : '/wx1'
+    },
+    BaseRequest () {
+      return JSON.parse(this.getLocalStorage('loginInit'))
     }
   },
   methods: {
@@ -145,7 +152,7 @@ export default {
             margin: 5px 10px;
             &-image {
               cursor: pointer;
-              height: 120px;
+              padding: 8px;
               .custom-emoji {
                 width: 60px;
               }

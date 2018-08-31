@@ -26,9 +26,19 @@
       <v-btn flat icon small :color="emojiBoxShow?'pink':'grey darken-2'" @click="emojiBoxShow = !emojiBoxShow">
         <v-icon>face</v-icon>
       </v-btn>
-      <v-btn flat icon small color="grey darken-2">
-        <v-icon>unarchive</v-icon>
-      </v-btn>
+      <el-upload
+        style="display: inline-block;"
+        ref="upload"
+        action="/upload/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json"
+        :show-file-list="false"
+        :before-upload="handleBeforeUpload"
+        multiple
+        :with-credentials="true"
+        :file-list="fileList">
+        <v-btn flat icon small color="grey darken-2">
+          <v-icon>unarchive</v-icon>
+        </v-btn>
+      </el-upload>
       <v-btn flat icon small color="grey darken-2">
         <v-icon>camera_alt</v-icon>
       </v-btn>
@@ -47,7 +57,7 @@
 
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import {sendWxMsg} from '@/service/modules/wx'
+import {sendWxMsg, uploadMedia, sendMsgImg} from '@/service/modules/wx'
 import {QQFaceList, QQFaceMap, EmojiList, EmojiCodeMap} from '@/utils/dict'
 export default {
   components: {
@@ -55,7 +65,8 @@ export default {
   data: () => ({
     message: '',
     activeEmoji: 'qqemoji',
-    emojiBoxShow: false
+    emojiBoxShow: false,
+    fileList: []
   }),
   computed: {
     ...mapGetters(['loginWxUserInfo', 'activeUser', 'userChatLog', 'chatUserList', 'activeMessageList', 'activeIndex']),
@@ -127,6 +138,121 @@ export default {
       if (!this.message) this.message = ''
       // 将表情插入文本中，并另存一份非编译表情文本
       this.message += EmojiCodeMap[el.id]
+    },
+    // 附件上传前出处理
+    handleBeforeUpload (file) {
+      let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
+      let ext, mediatype
+      ext = file.name.match(/.*\.(.*)/)
+      if (ext) {
+        ext = ext[1].toLowerCase()
+      } else {
+        ext = ''
+      }
+      switch (ext) {
+        case 'bmp':
+        case 'jpeg':
+        case 'jpg':
+        case 'png':
+          mediatype = 'pic'
+          break
+        case 'mp4':
+          mediatype = 'video'
+          break
+        default:
+          mediatype = 'doc'
+      }
+      let uploadMediaRequest = JSON.stringify({
+        BaseRequest: {
+          DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
+          Sid: LoginInit.wxsid,
+          Skey: LoginInit.skey,
+          Uin: LoginInit.wxuin
+        },
+        ClientMediaId: (Date.now() + Math.random().toFixed(3)).replace('.', ''),
+        TotalLen: file.size,
+        StartPos: 0,
+        DataLen: file.size,
+        MediaType: 4,
+        UploadType: 2,
+        FromUserName: this.loginWxUserInfo.User.UserName,
+        ToUserName: this.activeUser.UserName
+      })
+      let data = file
+      let form = new FormData()
+      form.append('name', file.name)
+      form.append('type', file.type)
+      form.append('lastModifiedDate', new Date().toGMTString())
+      form.append('size', file.size)
+      form.append('mediatype', mediatype)
+      form.append('uploadmediarequest', uploadMediaRequest)
+      form.append('webwx_data_ticket', this.getCookie('webwx_data_ticket'))
+      form.append('pass_ticket', LoginInit.passTicket)
+      form.append('filename', data, {
+        filename: file.name,
+        contentType: file.type,
+        knownLength: file.size
+      })
+      this.uploadMedia(form).then(res => {
+        switch (mediatype) {
+          case 'pic':
+            this.sendMsgImg(res, JSON.parse(uploadMediaRequest).ClientMediaId)
+            break
+          case 'doc':
+            // this.sendDoc(file, ext, res)
+            break
+          case 'video':
+            break
+        }
+      })
+      return false
+    },
+    async uploadMedia (params) {
+      let res = await uploadMedia(params)
+      return res
+    },
+    // 发送图片
+    async sendMsgImg (data, clientMediaId) {
+      let LoginInit = JSON.parse(this.getLocalStorage('loginInit'))
+      let parmas = {
+        BaseRequest: {
+          DeviceID: 'e' + ('' + Math.random().toFixed(15)).substring(2, 17),
+          Sid: LoginInit.wxsid,
+          Skey: LoginInit.skey,
+          Uin: LoginInit.wxuin
+        },
+        Msg: {
+          ClientMediaId: (Date.now() + Math.random().toFixed(3)).replace('.', ''),
+          Content: '',
+          FromUserName: this.loginWxUserInfo.User.UserName,
+          ToUserName: this.activeUser.UserName,
+          LocalID: clientMediaId,
+          MediaId: data.MediaId,
+          Type: 3
+        },
+        Scene: 0
+      }
+      let res = await sendMsgImg(parmas)
+      if (res.BaseResponse.Ret === 0) {
+        let userChatLog = this.userChatLog
+        let chatUserList = this.chatUserList
+        let activeMessageList = this.activeMessageList
+        if (!userChatLog[this.activeUser.UserName]) userChatLog[this.activeUser.UserName] = []
+        userChatLog[this.activeUser.UserName].push({
+          Content: '',
+          FromUserName: this.loginWxUserInfo.User.UserName,
+          ToUserName: this.activeUser.UserName,
+          MsgId: res.MsgID,
+          MsgType: 3,
+          Status: 3
+        })
+        activeMessageList = userChatLog[this.activeUser.UserName] ? userChatLog[this.activeUser.UserName] : []
+        this.$store.commit('SET_ACTIVEMESSAGELIST', activeMessageList)
+        this.$store.commit('SET_USERCHATLOG', userChatLog)
+        chatUserList[this.activeIndex].newChat = '[图片]'
+        chatUserList[this.activeIndex].time = this.setDateFormat(new Date(), 0, 'hh:mm')
+        this.$store.commit('SET_CHATUSERLIST', chatUserList)
+      }
     }
   }
 }
